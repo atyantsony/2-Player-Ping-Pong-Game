@@ -1,0 +1,6 @@
+Thankyou for playing 2-Player Ping Pong
+
+Use Up Arrow Key and Down Arrow Key to control Right Paddle.
+Use W Key and S key to control Left Paddle.
+
+To Quit the game, Press ESC.
