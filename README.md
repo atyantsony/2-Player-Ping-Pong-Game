@@ -15,6 +15,6 @@ To Quit the game, Press ESC.
 ![image](https://user-images.githubusercontent.com/77500668/166127002-bb005bc6-e32e-44d7-b92a-7c7521513a0b.png)
 
 ### Troubleshoot:
-Incase the EXE file is Corrupted or you use Linux OS, try running make command.
+Incase the EXE file is Corrupted or if you use Linux/Mac OS, then try running make command.
 
 ##### Thankyou for playing 2-Player Ping Pong :)
