@@ -6,7 +6,7 @@ using namespace std;
 
 #define SCREEN_WIDTH 720
 #define SCREEN_HEIGHT 720
-#define FONT_SIZE 32
+#define FONT_SIZE 100
 #define BALL_SIZE 16
 #define BALL_SPEED 16
 #define PLAYER_SPEED 9
@@ -17,10 +17,10 @@ int Screen_Width = SCREEN_WIDTH, Screen_Height = SCREEN_HEIGHT;
 bool gameRunning;
 SDL_Window* window;
 SDL_Renderer* renderer;
-SDL_Color color, bg;
+SDL_Color color,textColor, bg, ballColor;
 TTF_Font* font;
 int lastFrame, lastTime = 0, fps, frameCount, timerFPS;
-SDL_Rect l_paddle, r_paddle, ball, score_board;
+SDL_Rect l_paddle, r_paddle, ball, score_board, mid_line;
 float xvel, yvel;
 string score;
 int lscore, rscore;
@@ -33,17 +33,36 @@ void write(string text, int x, int y)
     if(font == NULL)
         cout<<"Font not found\n";
     const char* t = text.c_str();
-    surface = TTF_RenderText(font, t, color, bg);
+
+    surface = TTF_RenderText(font, t, textColor, bg);
     texture = SDL_CreateTextureFromSurface(renderer, surface);
 
     score_board.w = surface->w;
     score_board.h = surface->h;
-    score_board.x = x - surface->w;
+    score_board.x = x - (surface->w/2);
     score_board.y = y - surface->h;
+
 
     SDL_FreeSurface(surface);
     SDL_RenderCopy(renderer, texture, NULL, &score_board);
     SDL_DestroyTexture(texture);       
+}
+
+void draw_circle(SDL_Renderer *renderer, int x, int y, int radius, SDL_Color color)
+{
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    for (int w = 0; w < radius * 2; w++)
+    {
+        for (int h = 0; h < radius * 2; h++)
+        {
+            int dx = radius - w; // horizontal offset
+            int dy = radius - h; // vertical offset
+            if ((dx*dx + dy*dy) <= (radius * radius))
+            {
+                SDL_RenderDrawPoint(renderer, x + dx, y + dy);
+            }
+        }
+    }
 }
 
 void render(){
@@ -57,13 +76,20 @@ void render(){
     }
 
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
-    write(score, (Screen_Width/2) + FONT_SIZE, FONT_SIZE*2);
-    SDL_RenderFillRect(renderer, &l_paddle);
-    SDL_RenderFillRect(renderer, &r_paddle);
-    SDL_RenderFillRect(renderer, &ball);
+    write(to_string(lscore), (Screen_Width/2) - FONT_SIZE, FONT_SIZE*2);
+    write(to_string(rscore), (Screen_Width/2) + FONT_SIZE, FONT_SIZE*2);
+    SDL_RenderDrawRect(renderer, &l_paddle);
+    SDL_RenderDrawRect(renderer, &r_paddle);
+    SDL_RenderDrawRect(renderer, &mid_line);
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_RenderDrawRect(renderer, &ball);
+    SDL_SetRenderDrawColor(renderer, ballColor.r, ballColor.g, ballColor.b, 0);
+    // DrawCircle(renderer, ball.x+(ball.w/2), ball.y+(ball.h/2), BALL_SIZE/2);
+    draw_circle(renderer, ball.x+(ball.w/2), ball.y+(ball.h/2), BALL_SIZE/2, ballColor);
+
 
     SDL_RenderPresent(renderer);
-    // SDL_RenderClear(renderer);
 
 }
 
@@ -113,7 +139,7 @@ void update(){
         double bounce = norm*(5*PI/12);
         xvel = BALL_SPEED * cos(bounce);
         yvel = (BALL_SPEED * -sin(bounce));
-        if (yvel == 0) yvel++;
+        if (yvel <= 5) yvel+=5;
     }
 
     if (SDL_HasIntersection(&ball, &r_paddle)){
@@ -122,7 +148,7 @@ void update(){
         double bounce = norm*(5*PI/12);
         xvel = -BALL_SPEED * cos(bounce);
         yvel = (BALL_SPEED * -sin(bounce));
-        if (yvel == 0) yvel++;
+        if (yvel <= 5) yvel+=5;
     }
 
     if (ball.y <= 0){
@@ -142,7 +168,7 @@ void update(){
         lscore++;
         serve();
     }
-    score = to_string(lscore)+" "+to_string(rscore);
+    score = to_string(lscore)+"     "+to_string(rscore);
 
     if (l_paddle.y <= 0)
         l_paddle.y = 0;
@@ -155,6 +181,7 @@ void update(){
         r_paddle.y = Screen_Height - r_paddle.h;
          
 }
+
 
 int main(int argv, char* argc[])
 {
@@ -170,7 +197,10 @@ int main(int argv, char* argc[])
 
     gameRunning = true;
     color.r=color.b=color.g=255;
+    textColor.b=255;textColor.r=textColor.g=0;
     bg.r=bg.b=bg.g = 0;
+    ballColor.r = 255;ballColor.g = ballColor.b = 0;
+
 
     lscore = rscore = 0;
     l_paddle.x = 32;
@@ -179,6 +209,11 @@ int main(int argv, char* argc[])
     l_paddle.y = (Screen_Height/2) - (l_paddle.h/2);
     r_paddle = l_paddle;
     r_paddle.x = Screen_Width-r_paddle.w-32;
+    mid_line.x = Screen_Width/2;
+    mid_line.y = 0;
+    mid_line.h = Screen_Height;
+    mid_line.w = 0;
+
 
     ball.w = ball.h = BALL_SIZE;
 
