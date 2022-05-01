@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SDL_mixer.h>
 #include <iostream>
 #include <math.h>
 using namespace std;
@@ -18,6 +19,7 @@ bool gameRunning;
 SDL_Window* window;
 SDL_Renderer* renderer;
 SDL_Color color,textColor, bg, ballColor;
+Mix_Chunk *hitSound, *scoreSound; //*serveSound;
 TTF_Font* font;
 int lastFrame, lastTime = 0, fps, frameCount, timerFPS;
 SDL_Rect l_paddle, r_paddle, ball, score_board, mid_line;
@@ -105,6 +107,7 @@ void serve(){
     yvel = 0;
     ball.y = (Screen_Height/2) - (BALL_SIZE/2);
     turn = !turn;
+    // Mix_PlayChannel(-1, serveSound , 0);
     
 }
 
@@ -140,6 +143,8 @@ void update(){
         xvel = BALL_SPEED * cos(bounce);
         yvel = (BALL_SPEED * -sin(bounce));
         if (yvel <= 5) yvel+=5;
+        Mix_PlayChannel(-1, hitSound, 0);
+
     }
 
     if (SDL_HasIntersection(&ball, &r_paddle)){
@@ -149,6 +154,8 @@ void update(){
         xvel = -BALL_SPEED * cos(bounce);
         yvel = (BALL_SPEED * -sin(bounce));
         if (yvel <= 5) yvel+=5;
+        Mix_PlayChannel(-1, hitSound, 0);
+
     }
 
     if (ball.y <= 0){
@@ -161,10 +168,12 @@ void update(){
     ball.y += yvel;
 
     if(ball.x <= 0){
+        Mix_PlayChannel(-1, scoreSound, 0);
         rscore++;
         serve();
     }
     if (ball.x + BALL_SIZE >= Screen_Width){
+        Mix_PlayChannel(-1, scoreSound, 0);
         lscore++;
         serve();
     }
@@ -185,13 +194,21 @@ void update(){
 
 int main(int argv, char* argc[])
 {
-    if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
         cout<<"Error while initializing sdl\n";
     if (TTF_Init() < 0)
         cout<<"Error while initializing ttf\n";
+
+    Mix_Init(MIX_INIT_OGG);
+    Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);
+    hitSound = Mix_LoadWAV("res/sounds_ping_pong_8bit/ping_pong_8bit_plop.ogg"); 
+    scoreSound = Mix_LoadWAV("res/sounds_ping_pong_8bit/ping_pong_8bit_peeeeeep.ogg");
+    // serveSound = Mix_LoadWAV("res/sounds_ping_pong_8bit/ping_pong_8bit_beeep.ogg");
+
+
     if (SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer) < 0)
         cout<<"Error while creating window and renderer\n";
-    font = TTF_OpenFont("Peepo.ttf", FONT_SIZE);
+    font = TTF_OpenFont("res/Peepo.ttf", FONT_SIZE);
 
     SDL_GetRendererOutputSize(renderer, &Screen_Width, &Screen_Height);
 
@@ -234,6 +251,11 @@ int main(int argv, char* argc[])
 
 
     TTF_CloseFont(font);
+    Mix_FreeChunk(scoreSound);
+    // Mix_FreeChunk(serveSound);
+    Mix_FreeChunk(hitSound);
+    Mix_CloseAudio();
+    Mix_Quit();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
