@@ -1,8 +1,14 @@
 # 2-Player-Ping-Pong-Game
 ## Ping Pong Game made with C++, SDL2 and TTF
 
+### Run Game:
+Download this Repository as ZIP folder or Clone it to your Computer.
+
+Then double click on Game.exe
+
 ### Controls:
 Use Up Arrow Key and Down Arrow Key to control Right Paddle.
+
 Use W Key and S key to control Left Paddle.
 
 To Quit the game, Press ESC.
