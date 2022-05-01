@@ -1,5 +1,5 @@
 # 2-Player-Ping-Pong-Game
-## Ping Pong Game made with C++, SDL2 and TTF
+## Ping Pong Game made with C++, SDL2, SDL2_TTF and SDL2_Mixer
 
 ### Run Game:
 Download this Repository as ZIP folder or Clone it to your Computer.
